@@ -1,0 +1,198 @@
+/* QRScanner.css — QR attendance scanner */
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.qr-scanner {
+  animation: fadeUp 0.4s ease-out;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* ── Scan card ───────────────────────────────────── */
+.scan-card {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  margin-bottom: 16px;
+}
+
+.scan-section-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 12px;
+}
+
+/* ── Input row ───────────────────────────────────── */
+.scan-input-row {
+  display: flex;
+  gap: 10px;
+}
+
+.scan-input-row input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  background: var(--surface);
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.scan-input-row input:focus {
+  border-color: var(--rose);
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: var(--rose);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: opacity 0.15s;
+  white-space: nowrap;
+}
+
+.btn-primary:hover { opacity: 0.85; }
+
+/* ── Result banner ───────────────────────────────── */
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.result-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 16px;
+  animation: slideIn 0.25s ease-out;
+}
+
+.result-banner.success {
+  background: var(--emerald-light);
+  border: 0.5px solid var(--emerald-mid);
+}
+
+.result-banner.error {
+  background: var(--danger-light);
+  border: 0.5px solid var(--danger-mid);
+}
+
+.result-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.result-banner.success .result-icon { color: var(--emerald); }
+.result-banner.error   .result-icon { color: var(--danger); }
+
+.result-msg {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.result-banner.success .result-msg { color: var(--emerald); }
+.result-banner.error   .result-msg { color: var(--danger); }
+
+/* ── Recent arrivals list ────────────────────────── */
+.recent-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.recent-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 0.5px solid var(--border);
+}
+
+.recent-item:last-child {
+  border-bottom: none;
+}
+
+.avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--emerald-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--emerald);
+  flex-shrink: 0;
+}
+
+.recent-name {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.recent-time {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.no-data {
+  font-size: 13px;
+  color: var(--text-secondary);
+  padding: 8px 0;
+}
+
+/* ── Instructions list ───────────────────────────── */
+.instr-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.instr-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 0.5px solid var(--border);
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.instr-list li:last-child {
+  border-bottom: none;
+}
+
+.instr-list li i {
+  color: var(--rose);
+  font-size: 15px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* ── Responsive ──────────────────────────────────── */
+@media (max-width: 480px) {
+  .scan-input-row {
+    flex-direction: column;
+  }
+}

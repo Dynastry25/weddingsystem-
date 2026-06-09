@@ -1,0 +1,220 @@
+/* WeddingCard.css — invitation card overlay */
+
+@keyframes fadeIn  { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── Overlay ─────────────────────────────────────── */
+.card-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+  animation: fadeIn 0.2s ease;
+  backdrop-filter: blur(4px);
+}
+
+/* ── Modal shell ─────────────────────────────────── */
+.card-modal {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 520px;
+  animation: slideUp 0.3s ease-out;
+  overflow: hidden;
+}
+
+.card-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 0.5px solid var(--border);
+}
+
+.card-modal-title {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 20px;
+  line-height: 1;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-btn:hover {
+  color: var(--text-primary);
+  background: var(--surface-2);
+}
+
+/* ── Invitation card ─────────────────────────────── */
+.invitation-card {
+  background: linear-gradient(145deg, #fdf6f0 0%, #fff5f8 100%);
+  margin: 20px;
+  border-radius: 12px;
+  padding: 32px 28px;
+  text-align: center;
+  border: 0.5px solid #ED93B1;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle dot-pattern watermark */
+.invitation-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.06;
+  background-image: radial-gradient(circle, #D4537E 1px, transparent 1px);
+  background-size: 24px 24px;
+  border-radius: 12px;
+}
+
+.card-eyebrow {
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #D4537E;
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.card-guest-name {
+  font-size: 24px;
+  font-weight: 500;
+  color: #3a1a2a;
+  margin-bottom: 6px;
+  line-height: 1.2;
+}
+
+.card-event-date {
+  font-size: 13px;
+  color: #BA7517;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.card-venue {
+  font-size: 12px;
+  color: #7a5060;
+  margin-bottom: 16px;
+  line-height: 1.7;
+}
+
+.card-divider {
+  width: 40px;
+  height: 1px;
+  background: #ED93B1;
+  margin: 0 auto 16px;
+}
+
+.card-description {
+  font-size: 11px;
+  color: #9a7080;
+  max-width: 280px;
+  margin: 0 auto 20px;
+  line-height: 1.7;
+  font-style: italic;
+}
+
+.qr-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.qr-loading {
+  width: 100px;
+  height: 100px;
+  background: #f0e8ec;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: #9a7080;
+}
+
+.card-contact {
+  font-size: 10px;
+  letter-spacing: 0.8px;
+  color: #72243E;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+/* ── Download buttons ────────────────────────────── */
+.card-actions {
+  display: flex;
+  gap: 10px;
+  padding: 16px 20px;
+  border-top: 0.5px solid var(--border);
+}
+
+.btn-dl-pdf,
+.btn-dl-png {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: opacity 0.15s;
+}
+
+.btn-dl-pdf {
+  background: #c0392b;
+  color: #fff;
+}
+
+.btn-dl-png {
+  background: var(--emerald);
+  color: #fff;
+}
+
+.btn-dl-pdf:hover,
+.btn-dl-png:hover { opacity: 0.85; }
+
+.btn-dl-pdf:disabled,
+.btn-dl-png:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* ── Responsive ──────────────────────────────────── */
+@media (max-width: 480px) {
+  .invitation-card {
+    margin: 14px;
+    padding: 24px 18px;
+  }
+
+  .card-guest-name {
+    font-size: 20px;
+  }
+
+  .card-actions {
+    flex-direction: column;
+  }
+}
+
+@media print {
+  .card-overlay  { position: static; background: none; }
+  .card-modal-head,
+  .card-actions  { display: none; }
+}

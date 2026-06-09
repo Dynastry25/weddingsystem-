@@ -1,0 +1,437 @@
+/* Dashboard.css — guest management dashboard */
+
+/* ── Animations ──────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.dashboard {
+  animation: fadeUp 0.4s ease-out;
+}
+
+/* ── Stats grid ──────────────────────────────────── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.metric-card {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  border-left: 3px solid transparent;
+}
+
+.metric-card.accent-rose    { border-left-color: var(--rose); }
+.metric-card.accent-emerald { border-left-color: var(--emerald); }
+.metric-card.accent-gold    { border-left-color: var(--gold); }
+.metric-card.accent-sky     { border-left-color: var(--sky); }
+
+.metric-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.metric-value {
+  font-size: 26px;
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.metric-sub {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.progress-bar {
+  height: 5px;
+  background: var(--surface-2);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: var(--emerald-mid);
+  transition: width 0.4s ease;
+}
+
+/* ── Table card ──────────────────────────────────── */
+.table-card {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.table-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 0.5px solid var(--border);
+}
+
+.table-card-title {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+/* ── Data table ──────────────────────────────────── */
+.guest-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.guest-table th {
+  padding: 10px 16px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-align: left;
+  border-bottom: 0.5px solid var(--border);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.guest-table td {
+  padding: 12px 16px;
+  font-size: 13px;
+  color: var(--text-primary);
+  border-bottom: 0.5px solid var(--border);
+  vertical-align: middle;
+}
+
+.guest-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.guest-table tbody tr:hover td {
+  background: var(--surface-2);
+}
+
+/* ── Badges ──────────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.badge-attended {
+  background: var(--emerald-light);
+  color: var(--emerald);
+}
+
+.badge-pending {
+  background: var(--gold-light);
+  color: var(--gold);
+}
+
+.badge-single {
+  background: var(--sky-light);
+  color: var(--sky);
+}
+
+.badge-double {
+  background: var(--rose-light);
+  color: var(--rose-dark);
+}
+
+/* ── Action buttons ──────────────────────────────── */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: var(--rose);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: opacity 0.15s;
+}
+
+.btn-primary:hover { opacity: 0.85; }
+
+.btn-view {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  background: transparent;
+  color: var(--sky);
+  border: 0.5px solid var(--sky-mid);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 12px;
+  transition: background 0.15s;
+}
+
+.btn-view:hover { background: var(--sky-light); }
+
+.btn-danger {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  background: transparent;
+  color: var(--danger);
+  border: 0.5px solid var(--danger-mid);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 12px;
+  transition: background 0.15s;
+}
+
+.btn-danger:hover { background: var(--danger-light); }
+
+/* ── Empty state ─────────────────────────────────── */
+.empty-state {
+  text-align: center;
+  padding: 60px 24px;
+}
+
+.empty-icon {
+  font-size: 40px;
+  color: var(--rose-mid);
+  margin-bottom: 12px;
+}
+
+.empty-title {
+  font-size: 15px;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+.empty-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+}
+
+/* ── Add-guest modal ─────────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+}
+
+.modal {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border: 0.5px solid var(--border);
+  animation: fadeUp 0.2s ease-out;
+}
+
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 0.5px solid var(--border);
+}
+
+.modal-title {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 20px;
+  line-height: 1;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-btn:hover {
+  color: var(--text-primary);
+  background: var(--surface-2);
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+.modal-foot {
+  padding: 16px 24px;
+  border-top: 0.5px solid var(--border);
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+/* ── QR hint strip ───────────────────────────────── */
+.qr-hint {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--rose-light);
+  border: 0.5px solid var(--rose-mid);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  margin-bottom: 20px;
+}
+
+.qr-hint-icon {
+  color: var(--rose-dark);
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.qr-hint-code {
+  font-family: var(--mono, monospace);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--rose-dark);
+}
+
+.qr-hint-note {
+  font-size: 11px;
+  color: var(--rose-dark);
+  opacity: 0.7;
+  margin-top: 2px;
+}
+
+/* ── Form fields ─────────────────────────────────── */
+.field {
+  margin-bottom: 16px;
+}
+
+.field label {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 6px;
+}
+
+.field input,
+.field select {
+  width: 100%;
+  padding: 9px 12px;
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  background: var(--surface);
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.field input:focus,
+.field select:focus {
+  border-color: var(--rose);
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* ── Ghost button ────────────────────────────────── */
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: transparent;
+  color: var(--text-secondary);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 13px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.btn-ghost:hover {
+  background: var(--surface-2);
+  color: var(--text-primary);
+}
+
+/* ── Floating action button ──────────────────────── */
+.fab {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--rose);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-size: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(212, 83, 126, 0.35);
+  transition: transform 0.15s, opacity 0.15s;
+  z-index: 999;
+}
+
+.fab:hover {
+  transform: scale(1.08);
+  opacity: 0.9;
+}
+
+/* ── Responsive ──────────────────────────────────── */
+@media (max-width: 600px) {
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .field-row {
+    grid-template-columns: 1fr;
+  }
+
+  .guest-table th:nth-child(n+5),
+  .guest-table td:nth-child(n+5) {
+    display: none;
+  }
+}
+
+@media (max-width: 400px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}

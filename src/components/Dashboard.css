@@ -1,5 +1,3 @@
-/* Dashboard.css — guest management dashboard */
-
 /* ── Animations ──────────────────────────────────── */
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(16px); }
@@ -263,7 +261,7 @@
 
 .modal-title {
   font-size: 16px;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .close-btn {
@@ -282,7 +280,7 @@
 
 .close-btn:hover {
   color: var(--text-primary);
-  background: var(--surface-2);
+  background: red;
 }
 
 .modal-body {
@@ -348,7 +346,7 @@
 .field select {
   width: 100%;
   padding: 9px 12px;
-  border: 0.5px solid var(--border);
+  border: 0.5px solid #fff;
   border-radius: var(--radius-sm);
   font-size: 14px;
   background: var(--surface);
@@ -384,7 +382,7 @@
 }
 
 .btn-ghost:hover {
-  background: var(--surface-2);
+  background: red;
   color: var(--text-primary);
 }
 
@@ -434,4 +432,74 @@
   .stats-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* ── Card hint strip ─────────────────────────────── */
+.card-hint {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(135deg, #fbeaf0, #f5e6ee);
+  border: 1px solid #ED93B1;
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  margin-bottom: 20px;
+}
+
+.card-hint-icon { font-size: 24px; flex-shrink: 0; }
+
+.card-hint-heading {
+  font-size: 13px;
+  font-weight: 700;
+  color: #72243E;
+  margin-bottom: 2px;
+  font-family: Georgia, serif;
+}
+
+.card-hint-sub {
+  font-size: 11px;
+  color: #9a5060;
+}
+
+/* ── Status toggle cards ─────────────────────────── */
+.status-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.toggle-opt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 14px 10px;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.toggle-opt:hover {
+  border-color: #ED93B1;
+  background: #fbeaf0;
+}
+
+.toggle-opt.selected {
+  border-color: #D4537E;
+  background: linear-gradient(135deg, #fbeaf0, #f5e6ee);
+}
+
+.toggle-icon { font-size: 22px; }
+
+.toggle-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #5a1a3a;
+}
+
+.toggle-desc {
+  font-size: 11px;
+  color: var(--text-secondary);
 }

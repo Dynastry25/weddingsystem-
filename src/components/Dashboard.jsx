@@ -1,130 +1,163 @@
-import React, { useState } from 'react';
-import QRCode from 'qrcode';
+import React, { useState, useEffect, useCallback } from 'react';
 import './Dashboard.css';
 
-function Dashboard({ guests, onAddGuest, onDeleteGuest, onViewCard }) {
+const API = 'http://localhost:5000/api/wedding-guests';
+
+const genCode = (name) => {
+  const n = name.replace(/\s/g, '').substring(0, 4).toUpperCase();
+  const r = Math.random().toString(36).substring(2, 8).toUpperCase();
+  return `${n}-${r}`;
+};
+
+function Dashboard({ guests, setGuests, onViewCard }) {
   const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({
-    name: '',
-    phone: '',
-    status: 'single',
-    venue: 'Ukumbi wa Harusi - Jitegemee Hall',
-    date: new Date().toISOString().split('T')[0],
-    time: '14:00',
-  });
+  const [name,     setName]     = useState('');
+  const [status,   setStatus]   = useState('single');
+  const [saving,   setSaving]   = useState(false);
+  const [loading,  setLoading]  = useState(false);
+  const [error,    setError]    = useState(null);
 
-  /* ── Derived stats ── */
-  const total = guests.length;
+  /* ── derived stats ── */
+  const total    = guests.length;
   const attended = guests.filter((g) => g.attended).length;
-  const pending = total - attended;
-  const single = guests.filter((g) => g.status === 'single').length;
-  const double_ = guests.filter((g) => g.status === 'double').length;
-  const pct = total > 0 ? Math.round((attended / total) * 100) : 0;
+  const pending  = total - attended;
+  const single   = guests.filter((g) => g.status === 'single').length;
+  const double_  = guests.filter((g) => g.status === 'double').length;
+  const pct      = total > 0 ? Math.round((attended / total) * 100) : 0;
 
-  /* ── Helpers ── */
-  const genCode = (name, phone) => {
-    const n = name.substring(0, 3).toUpperCase();
-    const p = phone.replace(/\D/g, '').substring(0, 4);
-    const r = Math.random().toString(36).substring(2, 8).toUpperCase();
-    return `${n}${p}${r}`;
-  };
+  /* ── normalise Mongo _id vs local id ── */
+  const gid = (g) => g._id || g.id;
 
-  const generateQRImage = async (data, code) => {
+  /* ── fetch all guests from server ── */
+  const fetchGuests = useCallback(async () => {
+    setLoading(true);
+    setError(null);
     try {
-      return await QRCode.toDataURL(
-        JSON.stringify({ uniqueCode: code, name: data.name, phone: data.phone, status: data.status }),
-        { width: 200, margin: 2, color: { dark: '#3a1a2a', light: '#ffffff' } }
-      );
-    } catch {
-      return null;
+      const res  = await fetch(API);
+      const json = await res.json();
+      if (!res.ok || !json.success) throw new Error(json.message || 'Hitilafu ya seva');
+      setGuests(json.data);
+    } catch (e) {
+      setError('Imeshindwa kupakia orodha: ' + e.message);
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [setGuests]);
 
-  const getCode = (guest) => {
-    if (guest.qrCodeData?.uniqueCode) return guest.qrCodeData.uniqueCode;
-    try { return JSON.parse(guest.qrCode)?.uniqueCode ?? 'N/A'; } catch { return 'N/A'; }
-  };
+  useEffect(() => { fetchGuests(); }, [fetchGuests]);
 
-  /* ── Form handlers ── */
-  const handleChange = (e) =>
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-
+  /* ── add new guest ── */
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.name.trim() || !formData.phone.trim()) {
-      alert('Please enter name and phone number.');
-      return;
+    if (!name.trim()) { alert('Tafadhali ingiza jina.'); return; }
+
+    setSaving(true);
+    setError(null);
+
+    const uniqueCode = genCode(name);
+    const payload = {
+      name:      name.trim(),
+      status,
+      qrCodeData: { uniqueCode, name: name.trim(), status },
+    };
+
+    try {
+      const res  = await fetch(API, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify(payload),
+      });
+      const json = await res.json();
+      if (!res.ok || !json.success) throw new Error(json.message || 'Hitilafu ya seva');
+
+      setGuests((prev) => [json.data, ...prev]);
+      setName('');
+      setStatus('single');
+      setShowForm(false);
+    } catch (e) {
+      setError('Imeshindwa kuongeza mgeni: ' + e.message);
+    } finally {
+      setSaving(false);
     }
-    const uniqueCode = genCode(formData.name, formData.phone);
-    const qrImageUrl = await generateQRImage(formData, uniqueCode);
-    onAddGuest({
-      ...formData,
-      qrCodeData: { uniqueCode, qrImageUrl, name: formData.name, phone: formData.phone, status: formData.status },
-    });
-    setFormData({
-      name: '', phone: '', status: 'single',
-      venue: 'Ukumbi wa Harusi - Jitegemee Hall',
-      date: new Date().toISOString().split('T')[0],
-      time: '14:00',
-    });
-    setShowForm(false);
   };
 
-  const qrPreview =
-    formData.name && formData.phone
-      ? `${formData.name.substring(0, 3).toUpperCase()}${formData.phone.replace(/\D/g, '').substring(0, 4)}XXXX`
-      : 'XXXX-XXXX-XXXX';
+  /* ── delete guest (soft-delete via API) ── */
+  const handleDelete = async (id) => {
+    if (!window.confirm('Je, una uhakika unataka kufuta mwalikwa huyu?')) return;
+    try {
+      const res  = await fetch(`${API}/${id}`, { method: 'DELETE' });
+      const json = await res.json();
+      if (!res.ok || !json.success) throw new Error(json.message);
+      setGuests((prev) => prev.filter((g) => gid(g) !== id));
+    } catch (e) {
+      alert('Imeshindwa kufuta: ' + e.message);
+    }
+  };
 
   return (
     <div className="dashboard">
-      {/* ── Stats ── */}
+
+      {/* ── error banner ── */}
+      {error && (
+        <div className="error-banner">
+          <span>⚠️ {error}</span>
+          <button onClick={() => setError(null)}>✕</button>
+        </div>
+      )}
+
+      {/* ── stats ── */}
       <div className="stats-grid">
         <div className="metric-card accent-rose">
-          <div className="metric-label">Total guests</div>
-          <div className="metric-value">{total}</div>
-          <div className="metric-sub">invited</div>
+          <div className="metric-label">Wageni wote</div>
+          <div className="metric-value">{loading ? '…' : total}</div>
+          <div className="metric-sub">waliombwa</div>
         </div>
-
         <div className="metric-card accent-emerald">
-          <div className="metric-label">Arrived</div>
-          <div className="metric-value">{attended}</div>
-          <div className="metric-sub">{pct}% attendance rate</div>
+          <div className="metric-label">Waliowasili</div>
+          <div className="metric-value">{loading ? '…' : attended}</div>
+          <div className="metric-sub">{pct}% ya wageni</div>
           <div className="progress-bar">
             <div className="progress-fill" style={{ width: `${pct}%` }} />
           </div>
         </div>
-
         <div className="metric-card accent-gold">
-          <div className="metric-label">Pending</div>
-          <div className="metric-value">{pending}</div>
-          <div className="metric-sub">not yet arrived</div>
+          <div className="metric-label">Wanasubiri</div>
+          <div className="metric-value">{loading ? '…' : pending}</div>
+          <div className="metric-sub">hawajafika bado</div>
         </div>
-
         <div className="metric-card accent-sky">
           <div className="metric-label">Single / Double</div>
-          <div className="metric-value">{single} / {double_}</div>
-          <div className="metric-sub">invitation types</div>
+          <div className="metric-value">{loading ? '…' : `${single} / ${double_}`}</div>
+          <div className="metric-sub">aina za mwaliko</div>
         </div>
       </div>
 
-      {/* ── Guest table ── */}
+      {/* ── table ── */}
       <div className="table-card">
         <div className="table-card-head">
-          <span className="table-card-title">Guest list</span>
-          <button className="btn-primary" onClick={() => setShowForm(true)}>
-            <i className="ti ti-user-plus" aria-hidden="true" /> Add guest
-          </button>
+          <span className="table-card-title">Orodha ya Wageni</span>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button className="btn-ghost" onClick={fetchGuests} disabled={loading}>
+              {loading ? '⏳' : '🔄'} Refresh
+            </button>
+            <button className="btn-primary" onClick={() => setShowForm(true)}>
+              + Ongeza Mgeni
+            </button>
+          </div>
         </div>
 
-        {guests.length === 0 ? (
+        {loading ? (
           <div className="empty-state">
-            <div className="empty-icon">
-              <i className="ti ti-confetti" aria-hidden="true" />
-            </div>
-            <div className="empty-title">No guests yet</div>
-            <p className="empty-desc">Add your first guest to generate their invitation card.</p>
+            <div className="empty-icon">⏳</div>
+            <div className="empty-title">Inapakia orodha kutoka seva…</div>
+          </div>
+        ) : guests.length === 0 ? (
+          <div className="empty-state">
+            <div className="empty-icon">💌</div>
+            <div className="empty-title">Hakuna mgeni bado</div>
+            <p className="empty-desc">Ongeza mgeni wa kwanza ili utoe kadi yake ya mwaliko.</p>
             <button className="btn-primary" onClick={() => setShowForm(true)}>
-              <i className="ti ti-user-plus" aria-hidden="true" /> Add guest
+              + Ongeza Mgeni
             </button>
           </div>
         ) : (
@@ -132,47 +165,37 @@ function Dashboard({ guests, onAddGuest, onDeleteGuest, onViewCard }) {
             <table className="guest-table">
               <thead>
                 <tr>
-                  <th>Code</th>
-                  <th>Name</th>
-                  <th>Phone</th>
-                  <th>Type</th>
-                  <th>Date</th>
-                  <th>Status</th>
-                  <th>Card</th>
+                  <th>#</th>
+                  <th>Jina</th>
+                  <th>Aina</th>
+                  <th>Hali</th>
+                  <th>Kadi</th>
                   <th></th>
                 </tr>
               </thead>
               <tbody>
-                {guests.map((guest) => (
-                  <tr key={guest.id}>
-                    <td><code>{getCode(guest).substring(0, 12)}</code></td>
-                    <td><strong>{guest.name}</strong></td>
-                    <td style={{ color: 'var(--text-secondary)' }}>{guest.phone}</td>
+                {guests.map((g, i) => (
+                  <tr key={gid(g)}>
+                    <td><code>{i + 1}</code></td>
+                    <td><strong>{g.name}</strong></td>
                     <td>
-                      {guest.status === 'single'
+                      {g.status === 'single'
                         ? <span className="badge badge-single">Single</span>
                         : <span className="badge badge-double">Double</span>}
                     </td>
-                    <td style={{ color: 'var(--text-secondary)', fontSize: 12 }}>
-                      {guest.date || '—'}
+                    <td>
+                      {g.attended
+                        ? <span className="badge badge-attended">✓ Aliwasili</span>
+                        : <span className="badge badge-pending">⏳ Anasubiri</span>}
                     </td>
                     <td>
-                      {guest.attended
-                        ? <span className="badge badge-attended">
-                            <i className="ti ti-check" style={{ fontSize: 10 }} aria-hidden="true" /> Arrived
-                          </span>
-                        : <span className="badge badge-pending">
-                            <i className="ti ti-clock" style={{ fontSize: 10 }} aria-hidden="true" /> Pending
-                          </span>}
-                    </td>
-                    <td>
-                      <button className="btn-view" onClick={() => onViewCard(guest)}>
-                        <i className="ti ti-eye" style={{ fontSize: 12 }} aria-hidden="true" /> View
+                      <button className="btn-view" onClick={() => onViewCard(g)}>
+                        👁 Tazama
                       </button>
                     </td>
                     <td>
-                      <button className="btn-danger" onClick={() => onDeleteGuest(guest.id)}>
-                        <i className="ti ti-trash" style={{ fontSize: 12 }} aria-hidden="true" /> Remove
+                      <button className="btn-danger" onClick={() => handleDelete(gid(g))}>
+                        🗑 Futa
                       </button>
                     </td>
                   </tr>
@@ -183,88 +206,79 @@ function Dashboard({ guests, onAddGuest, onDeleteGuest, onViewCard }) {
         )}
       </div>
 
-      {/* ── Floating action button ── */}
-      <button className="fab" onClick={() => setShowForm(true)} aria-label="Add new guest">
-        <i className="ti ti-plus" aria-hidden="true" />
-      </button>
+      {/* ── FAB ── */}
+      <button className="fab" onClick={() => setShowForm(true)} aria-label="Ongeza mgeni">+</button>
 
-      {/* ── Add guest modal ── */}
+      {/* ── modal ── */}
       {showForm && (
         <div
           className="modal-overlay"
           onClick={(e) => { if (e.target === e.currentTarget) setShowForm(false); }}
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="add-guest-title"
+          role="dialog" aria-modal="true" aria-labelledby="modal-title"
         >
           <div className="modal">
             <div className="modal-head">
-              <span className="modal-title" id="add-guest-title">Add new guest</span>
-              <button className="close-btn" onClick={() => setShowForm(false)} aria-label="Close">×</button>
+              <span className="modal-title" id="modal-title">Ongeza Mgeni Mpya</span>
+              <button className="close-btn" onClick={() => setShowForm(false)} aria-label="Funga">×</button>
             </div>
 
             <div className="modal-body">
-              {/* QR preview */}
-              <div className="qr-hint">
-                <i className="ti ti-qrcode qr-hint-icon" aria-hidden="true" />
+              <div className="card-hint">
+                <div className="card-hint-icon">💌</div>
                 <div>
-                  <div className="qr-hint-code">{qrPreview}</div>
-                  <div className="qr-hint-note">QR code generated automatically on save</div>
+                  <div className="card-hint-heading">Kadi ya Mwaliko</div>
+                  <div className="card-hint-sub">
+                    Kadi itahifadhiwa kwenye seva na kutengenezwa moja kwa moja
+                  </div>
                 </div>
               </div>
 
               <form onSubmit={handleSubmit}>
                 <div className="field">
-                  <label htmlFor="f-name">Full name *</label>
+                  <label htmlFor="f-name">Jina kamili *</label>
                   <input
-                    id="f-name" name="name" type="text"
-                    value={formData.name} onChange={handleChange}
-                    placeholder="e.g. Fatma Hassan" required autoFocus
+                    id="f-name" type="text" value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="mf. Amina Juma Hassan"
+                    required autoFocus disabled={saving}
                   />
                 </div>
 
                 <div className="field">
-                  <label htmlFor="f-phone">Phone number *</label>
-                  <input
-                    id="f-phone" name="phone" type="tel"
-                    value={formData.phone} onChange={handleChange}
-                    placeholder="e.g. 0712345678" required
-                  />
-                </div>
-
-                <div className="field">
-                  <label htmlFor="f-status">Invitation type</label>
-                  <select id="f-status" name="status" value={formData.status} onChange={handleChange}>
-                    <option value="single">Single — 1 person</option>
-                    <option value="double">Double — 2 people</option>
-                  </select>
-                </div>
-
-                <div className="field">
-                  <label htmlFor="f-venue">Venue</label>
-                  <input
-                    id="f-venue" name="venue" type="text"
-                    value={formData.venue} onChange={handleChange}
-                  />
-                </div>
-
-                <div className="field-row">
-                  <div className="field">
-                    <label htmlFor="f-date">Date</label>
-                    <input id="f-date" name="date" type="date" value={formData.date} onChange={handleChange} />
-                  </div>
-                  <div className="field">
-                    <label htmlFor="f-time">Time</label>
-                    <input id="f-time" name="time" type="time" value={formData.time} onChange={handleChange} />
+                  <label>Aina ya Mwaliko *</label>
+                  <div className="status-toggle">
+                    <button
+                      type="button"
+                      className={`toggle-opt${status === 'single' ? ' selected' : ''}`}
+                      onClick={() => setStatus('single')}
+                      disabled={saving}
+                    >
+                      <span className="toggle-icon">👤</span>
+                      <span className="toggle-label">Single</span>
+                      <span className="toggle-desc">Mtu 1</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={`toggle-opt${status === 'double' ? ' selected' : ''}`}
+                      onClick={() => setStatus('double')}
+                      disabled={saving}
+                    >
+                      <span className="toggle-icon">👥</span>
+                      <span className="toggle-label">Double</span>
+                      <span className="toggle-desc">Watu 2</span>
+                    </button>
                   </div>
                 </div>
 
-                <div className="modal-foot" style={{ padding: 0, marginTop: 4 }}>
-                  <button type="button" className="btn-ghost" onClick={() => setShowForm(false)}>
-                    Cancel
+                <div className="modal-foot" style={{ padding: 0, marginTop: 8 }}>
+                  <button
+                    type="button" className="btn-ghost"
+                    onClick={() => setShowForm(false)} disabled={saving}
+                  >
+                    Ghairi
                   </button>
-                  <button type="submit" className="btn-primary">
-                    <i className="ti ti-device-floppy" aria-hidden="true" /> Save & generate QR
+                  <button type="submit" className="btn-primary" disabled={saving}>
+                    {saving ? '⏳ Inahifadhi…' : '💾 Hifadhi & Tengeneza Kadi'}
                   </button>
                 </div>
               </form>

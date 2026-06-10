@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './Dashboard.css';
 
-const API = 'http://localhost:5000/api/wedding-guests';
+const API = 'https://uscftakwimu-11.onrender.com/api/wedding-guests';
 
 const genCode = (name) => {
   const n = name.replace(/\s/g, '').substring(0, 4).toUpperCase();

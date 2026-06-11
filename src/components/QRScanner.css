@@ -443,9 +443,9 @@
   flex-shrink: 0;
 }
 
-.qs-recent-name { flex: 1; font-size: 13px; font-weight: 500; color: #3a2030; }
-.qs-recent-time { font-size: 11px; color: #9a6a7a; white-space: nowrap; }
-.qs-no-data     { font-size: 13px; color: #9a6a7a; padding: 6px 0; }
+.qs-recent-name { flex: 1; font-size: 13px; font-weight: 500; color: #fff; }
+.qs-recent-time { font-size: 11px; color: #fff; white-space: nowrap; }
+.qs-no-data     { font-size: 13px; color: #fff; padding: 6px 0; }
 
 /* ── responsive ── */
 @media (max-width: 480px) {

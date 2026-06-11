@@ -427,7 +427,7 @@ function QRScanner({ guests, setGuests }) {
       {/* ── ALL-TIME RECENT ── */}
       <div className="qs-card">
         <div className="qs-card-head">
-          <span className="qs-card-title">📋 Waliowasili ({recentAttendees.length})</span>
+          <span className="qs-card-title">Waliowasili ({recentAttendees.length})</span>
         </div>
         {recentAttendees.length > 0 ? (
           <div className="qs-recent-list">

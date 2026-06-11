@@ -45,8 +45,8 @@ const S = {
     lineHeight: 1.2, margin: '4px 0 2px', textShadow: '0 1px 3px rgba(139,26,58,0.18)',
   },
   guestPill: {
-    background: 'rgba(255,255,255,0.5)', borderRadius: 8, padding: '8px 14px',
-    margin: '8px 4px 10px', border: '1px solid rgba(201,168,76,0.4)', textAlign: 'center',
+    background: 'none', padding: '2px',
+    margin: ' 1px', textAlign: 'center',
   },
   guestPillLabel: { fontSize: 9.5, color: '#9a6a7a', textTransform: 'uppercase', letterSpacing: 1.4, marginBottom: 2 },
   guestPillName:  { fontSize: 15, fontWeight: 700, color: '#5a1a3a', textAlign: 'center' },
@@ -208,7 +208,7 @@ function WeddingCard({ guest, onClose }) {
             {/* venue / date / time */}
             <div style={S.infoRow}>
               <div style={S.infoCol}>
-                <span style={S.infoEmoji}>📍</span>
+                <span style={S.infoEmoji}></span>
                 <span style={{ ...S.infoLabel, color: '#7a3a8a' }}>Mahali:</span>
                 <span style={S.infoVal}>Mawela Hall,<br />Sinza Vatican -<br />Dar es Salaam</span>
               </div>

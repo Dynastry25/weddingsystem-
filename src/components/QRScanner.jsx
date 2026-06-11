@@ -1,28 +1,18 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import jsQR from 'jsqr';                 // npm install jsqr
 import './QRScanner.css';
 
 const API = 'https://uscftakwimu-11.onrender.com/api/wedding-guests';
 
-/* ── load jsQR from CDN once ── */
-const loadJsQR = () =>
-  new Promise((resolve, reject) => {
-    if (window.jsQR) { resolve(window.jsQR); return; }
-    const s = document.createElement('script');
-    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jsqr/1.4.0/jsQR.min.js';
-    s.onload  = () => { if (window.jsQR) resolve(window.jsQR); else reject(new Error('jsQR haijapakia')); };
-    s.onerror = () => reject(new Error('Imeshindwa kupakia jsQR'));
-    document.head.appendChild(s);
-  });
-
 const PHASE = {
-  IDLE:      'idle',
-  REQUESTING:'requesting',  // asking browser for camera permission
-  SCANNING:  'scanning',    // camera live + scanning
-  LOADING:   'loading',     // QR found, querying API
-  FOUND:     'found',       // guest exists, not yet attended
-  ALREADY:   'already',     // guest already attended
-  NOT_FOUND: 'not_found',   // QR not in DB
-  CONFIRMED: 'confirmed',   // just approved
+  IDLE:       'idle',
+  REQUESTING: 'requesting',
+  SCANNING:   'scanning',
+  LOADING:    'loading',
+  FOUND:      'found',
+  ALREADY:    'already',
+  NOT_FOUND:  'not_found',
+  CONFIRMED:  'confirmed',
 };
 
 function QRScanner({ guests, setGuests }) {
@@ -37,11 +27,10 @@ function QRScanner({ guests, setGuests }) {
   const canvasRef   = useRef(null);
   const streamRef   = useRef(null);
   const rafRef      = useRef(null);
-  const jsQRFnRef   = useRef(null);
-  const scanningRef = useRef(false);  // guard: is scan loop running?
-  const lastCodeRef = useRef('');     // debounce
+  const scanningRef = useRef(false);
+  const lastCodeRef = useRef('');
 
-  /* ══ STOP CAMERA ════════════════════════════════ */
+  /* ══ STOP CAMERA ═════════════════════════════════ */
   const stopCamera = useCallback(() => {
     scanningRef.current = false;
     if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
@@ -49,154 +38,12 @@ function QRScanner({ guests, setGuests }) {
       streamRef.current.getTracks().forEach((t) => t.stop());
       streamRef.current = null;
     }
-    if (videoRef.current) {
-      videoRef.current.srcObject = null;
-    }
+    if (videoRef.current) videoRef.current.srcObject = null;
   }, []);
 
-  /* cleanup on unmount */
   useEffect(() => () => stopCamera(), [stopCamera]);
 
-  /* ══ SCAN LOOP — reads every frame ══════════════ */
-  const startScanLoop = useCallback(() => {
-    scanningRef.current = true;
-    lastCodeRef.current = '';
-
-    const tick = () => {
-      if (!scanningRef.current) return;
-
-      const video  = videoRef.current;
-      const canvas = canvasRef.current;
-
-      /* wait until video is playing and has real dimensions */
-      if (!video || !canvas || video.readyState < HTMLMediaElement.HAVE_ENOUGH_DATA
-          || video.videoWidth === 0) {
-        rafRef.current = requestAnimationFrame(tick);
-        return;
-      }
-
-      canvas.width  = video.videoWidth;
-      canvas.height = video.videoHeight;
-      const ctx = canvas.getContext('2d', { willReadFrequently: true });
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const result    = jsQRFnRef.current(
-        imageData.data, imageData.width, imageData.height,
-        { inversionAttempts: 'dontInvert' }
-      );
-
-      if (result?.data && result.data !== lastCodeRef.current) {
-        lastCodeRef.current = result.data;
-        handleCodeFound(result.data);
-        return; // stop loop — result handled
-      }
-
-      rafRef.current = requestAnimationFrame(tick);
-    };
-
-    rafRef.current = requestAnimationFrame(tick);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  /* ══ START CAMERA ════════════════════════════════ */
-  const startCamera = useCallback(async () => {
-    stopCamera();
-    setCamError(null);
-    setGuestData(null);
-    setPhase(PHASE.REQUESTING);
-
-    /* 1. load jsQR */
-    try {
-      jsQRFnRef.current = await loadJsQR();
-    } catch (e) {
-      setCamError('Imeshindwa kupakia maktaba ya QR: ' + e.message);
-      setPhase(PHASE.IDLE);
-      return;
-    }
-
-    /* 2. check mediaDevices API available */
-    if (!navigator.mediaDevices?.getUserMedia) {
-      setCamError('Kivinjari chako hakisaidii kamera. Tumia Chrome au Safari ya kisasa.');
-      setPhase(PHASE.IDLE);
-      return;
-    }
-
-    /* 3. request camera — try back camera first, fallback to any */
-    let stream = null;
-    try {
-      stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: { ideal: 'environment' },
-          width:  { ideal: 1280 },
-          height: { ideal: 720 },
-        },
-        audio: false,
-      });
-    } catch (firstErr) {
-      if (firstErr.name === 'NotAllowedError' || firstErr.name === 'PermissionDeniedError') {
-        setCamError(
-          'Ruhusa ya kamera ilikataliwa.\n\n' +
-          'Jinsi ya kuruhusu:\n' +
-          '• Chrome: Bonyeza kitufe cha kufuli 🔒 kwenye address bar → Camera → Allow\n' +
-          '• Safari: Settings → Safari → Camera → Allow\n' +
-          '• Firefox: Bonyeza 🔒 → Connection Secure → More info → Permissions'
-        );
-        setPhase(PHASE.IDLE);
-        return;
-      }
-      /* try any camera as fallback */
-      try {
-        stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-      } catch (secondErr) {
-        setCamError('Kamera haikupatikana: ' + secondErr.message);
-        setPhase(PHASE.IDLE);
-        return;
-      }
-    }
-
-    streamRef.current = stream;
-
-    /* 4. attach stream to video element */
-    const video = videoRef.current;
-    if (!video) {
-      stream.getTracks().forEach((t) => t.stop());
-      setCamError('Video element haikupatikana. Jaribu tena.');
-      setPhase(PHASE.IDLE);
-      return;
-    }
-
-    video.srcObject = stream;
-
-    /* 5. wait for video to be ready, then start scan loop */
-    const onCanPlay = () => {
-      video.removeEventListener('canplay', onCanPlay);
-      video.play()
-        .then(() => {
-          setPhase(PHASE.SCANNING);
-          startScanLoop();
-        })
-        .catch((e) => {
-          setCamError('Video haikuweza kuanza: ' + e.message);
-          setPhase(PHASE.IDLE);
-        });
-    };
-
-    video.addEventListener('canplay', onCanPlay);
-
-    /* safety timeout — if canplay never fires */
-    setTimeout(() => {
-      if (scanningRef.current === false && streamRef.current) {
-        video.removeEventListener('canplay', onCanPlay);
-        if (video.readyState >= HTMLMediaElement.HAVE_ENOUGH_DATA) {
-          video.play().then(() => { setPhase(PHASE.SCANNING); startScanLoop(); }).catch(() => {});
-        }
-      }
-    }, 3000);
-
-  }, [stopCamera, startScanLoop]);
-
-  /* ══ QR CODE FOUND — lookup in DB ═══════════════ */
+  /* ══ LOOKUP CODE IN API ══════════════════════════ */
   const handleCodeFound = useCallback(async (rawCode) => {
     stopCamera();
     setPhase(PHASE.LOADING);
@@ -225,11 +72,139 @@ function QRScanner({ guests, setGuests }) {
     }
   }, [stopCamera]);
 
+  /* ══ SCAN LOOP ═══════════════════════════════════ */
+  const startScanLoop = useCallback(() => {
+    scanningRef.current = true;
+    lastCodeRef.current = '';
+
+    const tick = () => {
+      if (!scanningRef.current) return;
+
+      const video  = videoRef.current;
+      const canvas = canvasRef.current;
+
+      if (
+        !video || !canvas ||
+        video.readyState < HTMLMediaElement.HAVE_ENOUGH_DATA ||
+        video.videoWidth === 0
+      ) {
+        rafRef.current = requestAnimationFrame(tick);
+        return;
+      }
+
+      canvas.width  = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const result    = jsQR(imageData.data, imageData.width, imageData.height, {
+        inversionAttempts: 'dontInvert',
+      });
+
+      if (result?.data && result.data !== lastCodeRef.current) {
+        lastCodeRef.current = result.data;
+        handleCodeFound(result.data);
+        return;
+      }
+
+      rafRef.current = requestAnimationFrame(tick);
+    };
+
+    rafRef.current = requestAnimationFrame(tick);
+  }, [handleCodeFound]);
+
+  /* ══ START CAMERA ════════════════════════════════ */
+  const startCamera = useCallback(async () => {
+    stopCamera();
+    setCamError(null);
+    setGuestData(null);
+    lastCodeRef.current = '';
+    setPhase(PHASE.REQUESTING);
+
+    /* check API availability */
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setCamError(
+        'Kivinjari chako hakisaidii kamera.\n' +
+        'Tumia Chrome au Safari ya kisasa, na hakikisha\n' +
+        'programu inafunguka kwa HTTPS.'
+      );
+      setPhase(PHASE.IDLE);
+      return;
+    }
+
+    /* request stream — back camera ideal, fallback any */
+    let stream = null;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } },
+        audio: false,
+      });
+    } catch (err) {
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        setCamError(
+          'Ruhusa ya kamera ilikataliwa.\n\n' +
+          'Jinsi ya kuruhusu:\n' +
+          '• Chrome/Android: Bonyeza 🔒 address bar → Camera → Ruhusu\n' +
+          '• Safari/iPhone: Mipangilio → Safari → Kamera → Ruhusu\n' +
+          '• Firefox: Bonyeza 🔒 → Maelezo zaidi → Ruhusa'
+        );
+        setPhase(PHASE.IDLE);
+        return;
+      }
+      /* try any camera */
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      } catch (err2) {
+        setCamError('Kamera haikupatikana: ' + err2.message);
+        setPhase(PHASE.IDLE);
+        return;
+      }
+    }
+
+    streamRef.current = stream;
+
+    /* attach to video element */
+    const video = videoRef.current;
+    if (!video) {
+      stream.getTracks().forEach((t) => t.stop());
+      setCamError('Hitilafu ya ndani. Jaribu upya.');
+      setPhase(PHASE.IDLE);
+      return;
+    }
+
+    video.srcObject = stream;
+
+    /* wait for canplay then start loop */
+    const onCanPlay = () => {
+      video.removeEventListener('canplay', onCanPlay);
+      video.play()
+        .then(() => {
+          setPhase(PHASE.SCANNING);
+          startScanLoop();
+        })
+        .catch((e) => {
+          setCamError('Video haikuweza kuanza: ' + e.message);
+          setPhase(PHASE.IDLE);
+        });
+    };
+    video.addEventListener('canplay', onCanPlay);
+
+    /* fallback if canplay fires slowly */
+    setTimeout(() => {
+      if (!scanningRef.current && videoRef.current?.readyState >= 3) {
+        video.removeEventListener('canplay', onCanPlay);
+        video.play()
+          .then(() => { setPhase(PHASE.SCANNING); startScanLoop(); })
+          .catch(() => {});
+      }
+    }, 3000);
+  }, [stopCamera, startScanLoop]);
+
   /* ══ APPROVE ATTENDANCE ══════════════════════════ */
   const handleApprove = async () => {
     if (!guestData || approving) return;
     setApproving(true);
-
     const uniqueCode = guestData.qrCodeData?.uniqueCode;
     try {
       const res  = await fetch(`${API}/scan`, {
@@ -238,7 +213,6 @@ function QRScanner({ guests, setGuests }) {
         body:    JSON.stringify({ uniqueCode }),
       });
       const json = await res.json();
-
       if (res.ok && json.success) {
         const updated = { ...guestData, attended: true, attendanceTime: new Date().toISOString() };
         setGuestData(updated);
@@ -250,6 +224,7 @@ function QRScanner({ guests, setGuests }) {
         setSessionLog((prev) => [updated, ...prev]);
         setPhase(PHASE.CONFIRMED);
       } else {
+        setGuestData((prev) => ({ ...prev, ...json.data }));
         setPhase(PHASE.ALREADY);
       }
     } catch (e) {
@@ -282,90 +257,73 @@ function QRScanner({ guests, setGuests }) {
     .sort((a, b) => new Date(b.attendanceTime) - new Date(a.attendanceTime))
     .slice(0, 6);
 
-  const isCameraPhase = phase === PHASE.SCANNING || phase === PHASE.REQUESTING;
+  const isCameraActive = phase === PHASE.SCANNING || phase === PHASE.REQUESTING;
 
-  /* ══════════════════════════════ RENDER */
+  /* ══ RENDER ══════════════════════════════════════ */
   return (
     <div className="qs-wrap">
 
-      {/* ══ CAMERA CARD ══════════════════════════════ */}
+      {/* ── CAMERA CARD ── */}
       <div className="qs-card">
         <div className="qs-card-head">
           <span className="qs-card-title">📷 Scan QR Code ya Mwalikwa</span>
-          {phase === PHASE.SCANNING && <span className="qs-live-badge">● LIVE</span>}
-          {phase === PHASE.REQUESTING && <span className="qs-live-badge pending">⏳ Inaomba ruhusa…</span>}
+          {phase === PHASE.SCANNING   && <span className="qs-live-badge">● LIVE</span>}
+          {phase === PHASE.REQUESTING && <span className="qs-live-badge pending">⏳ Inaomba…</span>}
         </div>
 
-        {/* viewport */}
-        <div className={`qs-viewport ${isCameraPhase ? 'active' : ''}`}>
-
-          {/* video — always in DOM so ref is always attached */}
+        {/* viewport — video always in DOM so ref stays attached */}
+        <div className={`qs-viewport ${isCameraActive ? 'active' : ''}`}>
           <video
             ref={videoRef}
             className="qs-video"
             playsInline
             muted
-            autoPlay
-            style={{ display: isCameraPhase ? 'block' : 'none' }}
+            style={{ display: isCameraActive ? 'block' : 'none' }}
           />
-
-          {/* hidden canvas for pixel reading */}
           <canvas ref={canvasRef} className="qs-canvas" />
 
-          {/* scan corners + line */}
           {phase === PHASE.SCANNING && (
             <div className="qs-corners" aria-hidden="true">
-              <div className="qs-corner tl" />
-              <div className="qs-corner tr" />
-              <div className="qs-corner bl" />
-              <div className="qs-corner br" />
+              <div className="qs-corner tl" /><div className="qs-corner tr" />
+              <div className="qs-corner bl" /><div className="qs-corner br" />
               <div className="qs-scan-line" />
             </div>
           )}
 
-          {/* idle placeholder */}
           {phase === PHASE.IDLE && (
             <div className="qs-placeholder">
               <div className="qs-placeholder-icon">📷</div>
-              <p>Bonyeza kitufe hapa chini kuanza ku-scan</p>
+              <p>Bonyeza "Washa Camera" kuanza ku-scan</p>
             </div>
           )}
-
-          {/* requesting permission */}
           {phase === PHASE.REQUESTING && (
             <div className="qs-placeholder">
               <div className="qs-spinner" />
               <p>Inaomba ruhusa ya kamera…</p>
             </div>
           )}
-
-          {/* loading after QR found */}
           {phase === PHASE.LOADING && (
-            <div className="qs-placeholder">
+            <div className="qs-placeholder" style={{ background: '#120810' }}>
               <div className="qs-spinner" />
-              <p>QR imepatikana! Inathibitisha kwenye seva…</p>
+              <p>QR imepatikana! Inathibitisha…</p>
             </div>
           )}
         </div>
 
-        {/* camera error */}
+        {/* error */}
         {camError && (
           <div className="qs-error-box">
-            <div className="qs-error-icon">⚠️</div>
+            <span className="qs-error-icon">⚠️</span>
             <pre className="qs-error-msg">{camError}</pre>
           </div>
         )}
 
-        {/* action buttons */}
+        {/* controls */}
         <div className="qs-controls">
-          {!isCameraPhase && phase !== PHASE.LOADING ? (
-            <button className="qs-btn-primary" onClick={startCamera}>
-              📷 Washa Camera
-            </button>
-          ) : phase === PHASE.SCANNING ? (
-            <button className="qs-btn-ghost" onClick={reset}>
-              ✕ Zima Camera
-            </button>
+          {phase === PHASE.SCANNING ? (
+            <button className="qs-btn-ghost" onClick={reset}>✕ Zima Camera</button>
+          ) : phase !== PHASE.REQUESTING && phase !== PHASE.LOADING ? (
+            <button className="qs-btn-primary" onClick={startCamera}>📷 Washa Camera</button>
           ) : null}
         </div>
 
@@ -381,19 +339,17 @@ function QRScanner({ guests, setGuests }) {
         </form>
       </div>
 
-      {/* ══ RESULT: GUEST FOUND — show info + approve ═ */}
+      {/* ── GUEST FOUND ── */}
       {phase === PHASE.FOUND && guestData && (
         <div className="qs-card qs-result-card">
           <div className="qs-result-header found">
             <span className="qs-result-icon">✅</span>
             <div>
               <div className="qs-result-title">Mwalikwa Amepatikana</div>
-              <div className="qs-result-sub">Taarifa zake zipo kwenye mfumo — thibitisha uwepo wake</div>
+              <div className="qs-result-sub">Taarifa zake zipo — thibitisha uwepo wake hapa chini</div>
             </div>
           </div>
-
           <GuestInfoBlock guest={guestData} />
-
           <div className="qs-approve-row">
             <button className="qs-btn-ghost" onClick={reset}>✕ Ghairi</button>
             <button className="qs-btn-approve" onClick={handleApprove} disabled={approving}>
@@ -403,7 +359,7 @@ function QRScanner({ guests, setGuests }) {
         </div>
       )}
 
-      {/* ══ RESULT: CONFIRMED ═══════════════════════ */}
+      {/* ── CONFIRMED ── */}
       {phase === PHASE.CONFIRMED && guestData && (
         <div className="qs-card qs-result-card">
           <div className="qs-result-header confirmed">
@@ -413,16 +369,14 @@ function QRScanner({ guests, setGuests }) {
               <div className="qs-result-sub">Uwepo umethibitishwa na kuhifadhiwa kwenye mfumo</div>
             </div>
           </div>
-
           <GuestInfoBlock guest={guestData} showTime />
-
           <div className="qs-approve-row">
             <button className="qs-btn-primary" onClick={startCamera}>📷 Scan Mwingine</button>
           </div>
         </div>
       )}
 
-      {/* ══ RESULT: ALREADY ATTENDED ════════════════ */}
+      {/* ── ALREADY ATTENDED ── */}
       {phase === PHASE.ALREADY && guestData && (
         <div className="qs-card qs-result-card">
           <div className="qs-result-header already">
@@ -432,16 +386,14 @@ function QRScanner({ guests, setGuests }) {
               <div className="qs-result-sub">Mwalikwa huyu ameshasajiliwa awali</div>
             </div>
           </div>
-
           <GuestInfoBlock guest={guestData} showTime />
-
           <div className="qs-approve-row">
             <button className="qs-btn-primary" onClick={startCamera}>📷 Scan Mwingine</button>
           </div>
         </div>
       )}
 
-      {/* ══ RESULT: NOT FOUND ═══════════════════════ */}
+      {/* ── NOT FOUND ── */}
       {phase === PHASE.NOT_FOUND && (
         <div className="qs-card qs-result-card">
           <div className="qs-result-header notfound">
@@ -452,7 +404,7 @@ function QRScanner({ guests, setGuests }) {
             </div>
           </div>
           <p className="qs-notfound-hint">
-            Hakikisha kadi ni halisi. Ikiwa tatizo linaendelea wasiliana na msimamizi wa harusi.
+            Hakikisha kadi ni halisi. Ikiwa tatizo linaendelea wasiliana na msimamizi.
           </p>
           <div className="qs-approve-row">
             <button className="qs-btn-primary" onClick={startCamera}>📷 Jaribu Tena</button>
@@ -460,30 +412,26 @@ function QRScanner({ guests, setGuests }) {
         </div>
       )}
 
-      {/* ══ SESSION LOG ═════════════════════════════ */}
+      {/* ── SESSION LOG ── */}
       {sessionLog.length > 0 && (
         <div className="qs-card">
           <div className="qs-card-head">
             <span className="qs-card-title">✅ Waliothibitishwa Sasa ({sessionLog.length})</span>
           </div>
           <div className="qs-recent-list">
-            {sessionLog.map((g) => (
-              <RecentItem key={g._id ?? g.qrCodeData?.uniqueCode} guest={g} />
-            ))}
+            {sessionLog.map((g) => <RecentItem key={g._id ?? g.qrCodeData?.uniqueCode} guest={g} />)}
           </div>
         </div>
       )}
 
-      {/* ══ ALL-TIME RECENT ═════════════════════════ */}
+      {/* ── ALL-TIME RECENT ── */}
       <div className="qs-card">
         <div className="qs-card-head">
           <span className="qs-card-title">📋 Waliowasili ({recentAttendees.length})</span>
         </div>
         {recentAttendees.length > 0 ? (
           <div className="qs-recent-list">
-            {recentAttendees.map((g) => (
-              <RecentItem key={g._id ?? g.id} guest={g} />
-            ))}
+            {recentAttendees.map((g) => <RecentItem key={g._id ?? g.id} guest={g} />)}
           </div>
         ) : (
           <p className="qs-no-data">Hakuna mgeni aliyewasili bado.</p>
@@ -502,7 +450,7 @@ function GuestInfoBlock({ guest, showTime }) {
         {guest.name.charAt(0).toUpperCase()}
       </div>
       <div className="qs-guest-details">
-        <InfoRow label="Jina"          value={<strong className="qs-name-val">{guest.name}</strong>} />
+        <InfoRow label="Jina"           value={<strong className="qs-name-val">{guest.name}</strong>} />
         <InfoRow label="Aina ya Mwaliko" value={
           <span className={`qs-badge ${guest.status === 'double' ? 'double' : 'single'}`}>
             {guest.status === 'double' ? '👥 Double' : '👤 Single'}
@@ -511,16 +459,15 @@ function GuestInfoBlock({ guest, showTime }) {
         <InfoRow label="Nambari ya QR"  value={<code className="qs-code">{guest.qrCodeData?.uniqueCode}</code>} />
         <InfoRow label="Ukumbi"         value={guest.venue} />
         <InfoRow label="Tarehe / Muda"  value={`${guest.date} · ${guest.time}`} />
-        {showTime && guest.attendanceTime && (
+        {showTime && guest.attendanceTime ? (
           <InfoRow label="Aliwasili Saa" value={
             <span className="qs-badge attended">
               ✓ {new Date(guest.attendanceTime).toLocaleTimeString('sw-TZ')}
             </span>
           } />
-        )}
-        {!showTime && (
+        ) : !showTime ? (
           <InfoRow label="Hali" value={<span className="qs-badge pending">⏳ Hajahudhuria bado</span>} />
-        )}
+        ) : null}
       </div>
     </div>
   );

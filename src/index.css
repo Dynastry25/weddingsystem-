@@ -38,9 +38,9 @@
   --radius-lg: 16px;
 
   /* Type */
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --sans: 'Montserrat', system-ui, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
-  --serif: Georgia, 'Times New Roman', serif;
+  --serif: 'Montserrat', system-ui, sans-serif;
 
   font-family: var(--sans);
   font-size: 15px;
@@ -62,13 +62,5 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { background: var(--surface-2); }
-#root { min-height: 100svh; display: flex; flex-direction: column; }
 
-code {
-  font-family: var(--mono);
-  font-size: 12px;
-  background: var(--surface-2);
-  padding: 2px 6px;
-  border-radius: 4px;
-  color: var(--text-secondary);
-}
+

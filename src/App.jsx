@@ -22,13 +22,13 @@ function App() {
             className={`nav-btn${currentView === 'dashboard' ? ' active' : ''}`}
             onClick={() => setCurrentView('dashboard')}
           >
-            📋 Orodha
+             Orodha
           </button>
           <button
             className={`nav-btn${currentView === 'scanner' ? ' active' : ''}`}
             onClick={() => setCurrentView('scanner')}
           >
-            📷 Scan QR
+            Scan QR
           </button>
         </nav>
       </header>

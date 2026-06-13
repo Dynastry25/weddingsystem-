@@ -60,7 +60,7 @@
   font-weight: 700;
   padding: 3px 10px;
   border-radius: 20px;
-  background: #fff;
+  background: #FCEBEB;
   color: #c0392b;
   letter-spacing: 0.5px;
   animation: pulseDot 1.2s ease-in-out infinite;
@@ -192,7 +192,7 @@
 .qs-btn-primary {
   width: 100%;
   padding: 11px;
-  background: #ffd600;
+  background: #D4537E;
   color: #fff;
   border: none;
   border-radius: 10px;
@@ -241,14 +241,14 @@
 .qs-manual button {
   padding: 9px 14px;
   background: #fbeaf0;
-  color: #fff;
-  border: 0.5px solid #ffd600;
+  color: #72243E;
+  border: 0.5px solid #ED93B1;
   border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
   transition: background 0.15s;
 }
-.qs-manual button:hover { background: #fff; }
+.qs-manual button:hover { background: #f5d5e5; }
 
 /* ══ RESULT CARDS ═══════════════════════════════════ */
 .qs-result-card {
@@ -274,13 +274,13 @@
 .qs-result-title {
   font-size: 16px;
   font-weight: 700;
-  color: #fff;
+  color: #2a1020;
   font-family: Georgia, serif;
 }
 
 .qs-result-sub {
   font-size: 12px;
-  color: #f5f5f5;
+  color: #7a5060;
   margin-top: 2px;
   line-height: 1.4;
 }
@@ -299,13 +299,13 @@
   height: 54px;
   border-radius: 50%;
   background: linear-gradient(135deg, #f5e6ee, #e8d5f0);
-  border: 2px solid #ffd600;
+  border: 2px solid #ED93B1;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 22px;
   font-weight: 700;
-  color: #ffd600;
+  color: #72243E;
   flex-shrink: 0;
   font-family: Georgia, serif;
 }
@@ -327,7 +327,7 @@
 .qs-info-label {
   font-size: 10.5px;
   font-weight: 600;
-  color: #fff;
+  color: #9a6a7a;
   text-transform: uppercase;
   letter-spacing: 0.4px;
   min-width: 100px;
@@ -337,14 +337,14 @@
 
 .qs-info-value {
   font-size: 13px;
-  color: #fff;
+  color: #3a2030;
   line-height: 1.4;
 }
 
 .qs-name-val {
   font-size: 16px;
   font-weight: 700;
-  color: #ffff;
+  color: #5a1a3a;
   font-family: Georgia, serif;
 }
 
@@ -354,7 +354,7 @@
   background: #f5e6ee;
   padding: 2px 8px;
   border-radius: 4px;
-  color: #fff;
+  color: #72243E;
 }
 
 /* ── badges ── */
@@ -433,19 +433,19 @@
   height: 32px;
   border-radius: 50%;
   background: linear-gradient(135deg, #f5e6ee, #e8d5f0);
-  border: 1px solid #ffd600;
+  border: 1px solid #ED93B1;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 13px;
   font-weight: 700;
-  color: #fff;
+  color: #72243E;
   flex-shrink: 0;
 }
 
-.qs-recent-name { flex: 1; font-size: 13px; font-weight: 500; color: #fff; }
-.qs-recent-time { font-size: 11px; color: #fff; white-space: nowrap; }
-.qs-no-data     { font-size: 13px; color: #fff; padding: 6px 0; }
+.qs-recent-name { flex: 1; font-size: 13px; font-weight: 500; color: #3a2030; }
+.qs-recent-time { font-size: 11px; color: #9a6a7a; white-space: nowrap; }
+.qs-no-data     { font-size: 13px; color: #9a6a7a; padding: 6px 0; }
 
 /* ── responsive ── */
 @media (max-width: 480px) {
@@ -454,4 +454,28 @@
   .qs-approve-row .qs-btn-approve{ flex: unset; }
   .qs-info-label  { min-width: 82px; }
   .qs-guest-avatar{ width: 44px; height: 44px; font-size: 18px; }
+}
+
+/* ── fps badge ── */
+.qs-fps-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 10px;
+  background: rgba(37,211,102,0.15);
+  color: #25d366;
+  letter-spacing: 0.3px;
+}
+
+/* ── inner guide box (helps user aim camera) ── */
+.qs-guide-box {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 55%;
+  aspect-ratio: 1;
+  border: 1px dashed rgba(212,83,126,0.4);
+  border-radius: 4px;
+  pointer-events: none;
+  z-index: 1;
 }

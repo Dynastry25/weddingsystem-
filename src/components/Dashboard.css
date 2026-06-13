@@ -17,7 +17,14 @@
 }
 
 .metric-card {
-  background: var(--surface);
+    background: linear-gradient(
+    90deg,
+    #020b2b 0%,
+    #051132 20%,
+    #06133a 50%,
+    #051132 80%,
+    #020b2b 100%
+  );
   border: 0.5px solid var(--border);
   border-radius: var(--radius-md);
   padding: 16px;
@@ -59,15 +66,14 @@
 .progress-fill {
   height: 100%;
   border-radius: 3px;
-  background: var(--emerald-mid);
+  background: green;
   transition: width 0.4s ease;
 }
 
 /* ── Table card ──────────────────────────────────── */
 .table-card {
-  background: var(--surface);
-  border: 0.5px solid var(--border);
-  border-radius: var(--radius-lg);
+  border: .5px solid;
+  border-radius: 10px solid;
   overflow: hidden;
 }
 
@@ -76,7 +82,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 16px 20px;
-  border-bottom: 0.5px solid var(--border);
+  border-bottom: 0.5px solid #ffd600;
 }
 
 .table-card-title {
@@ -100,7 +106,7 @@
   font-weight: 500;
   color: var(--text-secondary);
   text-align: left;
-  border-bottom: 0.5px solid var(--border);
+  border-bottom: 0.5px solid #ffd600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   white-space: nowrap;
@@ -110,7 +116,7 @@
   padding: 12px 16px;
   font-size: 13px;
   color: var(--text-primary);
-  border-bottom: 0.5px solid var(--border);
+  border-bottom: 0.5px solid #ffd600;
   vertical-align: middle;
 }
 
@@ -135,23 +141,13 @@
 }
 
 .badge-attended {
-  background: var(--emerald-light);
-  color: var(--emerald);
+  background: green;
+  color: white;
 }
 
 .badge-pending {
-  background: var(--gold-light);
-  color: var(--gold);
-}
-
-.badge-single {
-  background: var(--sky-light);
-  color: var(--sky);
-}
-
-.badge-double {
-  background: var(--rose-light);
-  color: var(--rose-dark);
+  background: red;
+  color: white;
 }
 
 /* ── Action buttons ──────────────────────────────── */
@@ -160,7 +156,7 @@
   align-items: center;
   gap: 6px;
   padding: 8px 16px;
-  background: var(--rose);
+  background: darkblue;
   color: #fff;
   border: none;
   border-radius: var(--radius-sm);
@@ -176,17 +172,16 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 5px 10px;
+  padding: 5px 5px;
   background: transparent;
-  color: var(--sky);
-  border: 0.5px solid var(--sky-mid);
+  color: white;
   border-radius: var(--radius-sm);
   cursor: pointer;
   font-size: 12px;
   transition: background 0.15s;
 }
 
-.btn-view:hover { background: var(--sky-light); }
+.btn-view:hover { background: darkblue; }
 
 .btn-danger {
   display: inline-flex;
@@ -194,7 +189,7 @@
   gap: 4px;
   padding: 5px 10px;
   background: transparent;
-  color: var(--danger);
+  color: yellow;
   border: 0.5px solid var(--danger-mid);
   border-radius: var(--radius-sm);
   cursor: pointer;
@@ -202,7 +197,7 @@
   transition: background 0.15s;
 }
 
-.btn-danger:hover { background: var(--danger-light); }
+.btn-danger:hover { background: red; color: white; }
 
 /* ── Empty state ─────────────────────────────────── */
 .empty-state {
@@ -241,13 +236,19 @@
 }
 
 .modal {
-  background: var(--surface);
-  border-radius: var(--radius-lg);
+      background: linear-gradient(
+    90deg,
+    #020b2b 0%,
+    #051132 20%,
+    #06133a 50%,
+    #051132 80%,
+    #020b2b 100%
+  );
+  border-radius: 0.5px solid #fff;
   width: 100%;
   max-width: 480px;
   max-height: 90vh;
   overflow-y: auto;
-  border: 0.5px solid var(--border);
   animation: fadeUp 0.2s ease-out;
 }
 
@@ -256,7 +257,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 20px 24px;
-  border-bottom: 0.5px solid var(--border);
+  border-bottom: 0.5px solid ;
 }
 
 .modal-title {
@@ -289,43 +290,12 @@
 
 .modal-foot {
   padding: 16px 24px;
-  border-top: 0.5px solid var(--border);
+  border-top: 0.5px solid ;
   display: flex;
   gap: 10px;
   justify-content: flex-end;
 }
 
-/* ── QR hint strip ───────────────────────────────── */
-.qr-hint {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: var(--rose-light);
-  border: 0.5px solid var(--rose-mid);
-  border-radius: var(--radius-sm);
-  padding: 12px 16px;
-  margin-bottom: 20px;
-}
-
-.qr-hint-icon {
-  color: var(--rose-dark);
-  font-size: 18px;
-  flex-shrink: 0;
-}
-
-.qr-hint-code {
-  font-family: var(--mono, monospace);
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--rose-dark);
-}
-
-.qr-hint-note {
-  font-size: 11px;
-  color: var(--rose-dark);
-  opacity: 0.7;
-  margin-top: 2px;
-}
 
 /* ── Form fields ─────────────────────────────────── */
 .field {
@@ -349,7 +319,7 @@
   border: 0.5px solid #fff;
   border-radius: var(--radius-sm);
   font-size: 14px;
-  background: var(--surface);
+  background: transparent;
   color: var(--text-primary);
   outline: none;
   transition: border-color 0.15s;
@@ -436,8 +406,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  background: linear-gradient(135deg, #fbeaf0, #f5e6ee);
-  border: 1px solid #ED93B1;
+  border: 0.5px solid #ffd600;
   border-radius: var(--radius-sm);
   padding: 12px 16px;
   margin-bottom: 20px;
@@ -448,14 +417,13 @@
 .card-hint-heading {
   font-size: 13px;
   font-weight: 700;
-  color: #72243E;
+  color: #fff;
   margin-bottom: 2px;
-  font-family: Georgia, serif;
 }
 
 .card-hint-sub {
   font-size: 11px;
-  color: #9a5060;
+  color: #f5e6ee;
 }
 
 /* ── Status toggle cards ─────────────────────────── */
@@ -470,22 +438,20 @@
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  padding: 14px 10px;
-  border-radius: var(--radius-sm);
-  border: 2px solid var(--border);
-  background: var(--surface);
+  padding: 4px;
+  border-radius: solid #fff;
+  background: transparent;
   cursor: pointer;
   transition: all 0.15s;
 }
 
 .toggle-opt:hover {
-  border-color: #ED93B1;
-  background: #fbeaf0;
+  border-color: #ffd600;
+  background: #fff;
 }
 
 .toggle-opt.selected {
-  border-color: #D4537E;
-  background: linear-gradient(135deg, #fbeaf0, #f5e6ee);
+  background: #ffd600;
 }
 
 .toggle-icon { font-size: 22px; }

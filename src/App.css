@@ -18,8 +18,7 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 24px;
-  background: darkblue;
+  padding: 12px 24px;
   border-bottom: 1px solid #ffd600;
   position: sticky;
   top: 0;
@@ -84,7 +83,14 @@ h1, h2, h3, h4, h5, h6 {
 .main-content {
   flex: 1;
   padding: 24px;
-  background: #faf5f8;
+    background: linear-gradient(
+    90deg,
+    #020b2b 0%,
+    #051132 20%,
+    #06133a 50%,
+    #051132 80%,
+    #020b2b 100%
+  );
 }
 
 @media (max-width: 600px) {

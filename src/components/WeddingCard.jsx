@@ -3,6 +3,7 @@ import html2canvas from 'html2canvas';
 import bgImage from '../assets/wedd.png';
 import pete from '../assets/pete.png';
 import lovers from '../assets/lovers.png';
+import love from '../assets/love.png';
 
 /* ── QR generator ── */
 async function buildQRDataUrl(text) {
@@ -384,7 +385,7 @@ function WeddingCard({ guest, onClose }) {
               position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
               alignItems: 'center', padding: '4% 9% 3%', boxSizing: 'border-box',
             }}>
-              <div style={{ fontFamily: "'Dancing Script','Brush Script MT',cursive", fontSize: f(18), color: '#f5c518', marginBottom: '1%', marginTop: '1%', letterSpacing: 0.3 }}>Familia ya</div>
+              <div style={{ fontFamily: "'Brush Script MT',cursive", fontSize: f(18), color: '#f5c518', marginBottom: '1%', marginTop: '1%', letterSpacing: 0.3 }}>Familia ya</div>
               <div style={{ textAlign: 'center', marginBottom: '1%' }}>
                 <div style={{ fontWeight: 700, fontSize: f(11), color: '#ffffff', letterSpacing: 0.8, textTransform: 'uppercase', lineHeight: 1.55 }}>
                   BWANA &amp; BIBI JOSEPH RUTTA WA<br />
@@ -396,14 +397,14 @@ function WeddingCard({ guest, onClose }) {
               <div style={{ fontSize: f(16), fontWeight: 700, color: '#f5c518', lineHeight: 1.2 }}>{guest.name}</div>
               <div style={{ width: '80%', borderTop: '1px dashed #f5c518', margin: '1.5% 0' }} />
 
-              <div style={{ fontFamily: "'Dancing Script','Brush Script MT',cursive", fontSize: f(28), color: '#ffffff', lineHeight: 1, marginBottom: '1%', textShadow: '1px 2px 6px rgba(0,0,0,0.5)' }}>Kwenye</div>
+              <div style={{ fontFamily: "'Brush Script MT',cursive", fontSize: f(28), color: '#ffffff', lineHeight: 1, marginBottom: '1%', textShadow: '1px 2px 6px rgba(0,0,0,0.5)' }}>Kwenye</div>
               <div style={{ fontWeight: 900, fontSize: f(32), color: '#f5c518', letterSpacing: 3, textTransform: 'uppercase', lineHeight: 1 }}>HARUSI</div>
               <div style={{ fontSize: f(10), color: '#c0c8d8', letterSpacing: 0.5, margin: '1% 0 1.5%' }}>ya vijana wao wapendwa</div>
 
-              <div style={{ fontFamily: "'Dancing Script','Brush Script MT',cursive", fontSize: f(30), color: '#ffffff', lineHeight: 1.1, textShadow: '1px 2px 8px rgba(0,0,0,0.55)' }}>Jovin</div>
+              <div style={{ fontFamily: "'Brush Script MT',cursive", fontSize: f(30), color: '#ffffff', lineHeight: 1.1, textShadow: '1px 2px 8px rgba(0,0,0,0.55)' }}>Jovin</div>
               <div style={{ fontSize: f(20), color: '#c9a84c', margin: '0.5% 0', opacity: '50%' }}>&</div>
               <img src={pete} alt="" crossOrigin="anonymous" style={{ position: 'absolute', top: '38%', left: '170px', opacity: '70%', width: '25%', height: 'auto', objectFit: 'cover', objectPosition: 'center', display: 'flex' }} />
-              <div style={{ fontFamily: "'Dancing Script','Brush Script MT',cursive", fontSize: f(30), color: '#ffffff', lineHeight: 1.1, textShadow: '1px 2px 8px rgba(0,0,0,0.55)', marginBottom: '2%' }}>Christina</div>
+              <div style={{ fontFamily: "'Brush Script MT',cursive", fontSize: f(30), color: '#ffffff', lineHeight: 1.1, textShadow: '1px 2px 8px rgba(0,0,0,0.55)', marginBottom: '2%' }}>Christina</div>
 
               <div style={{ display: 'flex', width: '90%', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5%', borderTop: '2px solid #f5c518', borderBottom: '2px solid #f5c518', padding: '1.5% 0' }}>
                 <div style={{ flex: 1, textAlign: 'center', paddingRight: 4 }}>
@@ -429,7 +430,7 @@ function WeddingCard({ guest, onClose }) {
               <div style={{ display: 'inline-block', border: `1px solid ${isDouble ? '#f5c518' : 'rgba(255,255,255,0.4)'}`, color: isDouble ? '#fff' : '#c0c8d8', fontSize: f(8), fontWeight: 800, padding: '2px 5px', borderRadius: 20, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 1 }}>
                 {isDouble ? ' DOUBLE' : ' SINGLE'}
               </div>
-
+              <img src={love} alt="" crossOrigin="anonymous" style={{ position: 'absolute', top: '68%', right: '35px', opacity: '100%', width: '32%', height: 'auto', objectFit: 'cover', objectPosition: 'center', display: 'flex' }} />
               <img src={lovers} alt="" crossOrigin="anonymous" style={{ position: 'absolute', top: '20%', right: '75px', opacity: '40%', width: '30%', height: 'auto', objectFit: 'cover', objectPosition: 'center', display: 'flex' }} />
 
               <div style={{ width: '28%', height: '105px', border: '2px solid #f5c518', borderRadius: 6, overflow: 'hidden', position: 'relative', background: 'rgba(10,22,40,0.55)', display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1.5%' }}>

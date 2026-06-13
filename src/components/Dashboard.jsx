@@ -224,7 +224,7 @@ function Dashboard({ guests, setGuests, onViewCard }) {
 
             <div className="modal-body">
               <div className="card-hint">
-                <div className="card-hint-icon">💌</div>
+                <div className="card-hint-icon"></div>
                 <div>
                   <div className="card-hint-heading">Kadi ya Mwaliko</div>
                   <div className="card-hint-sub">

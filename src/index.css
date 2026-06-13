@@ -46,7 +46,14 @@
   font-size: 15px;
   line-height: 1.5;
   color: var(--text-primary);
-  background: var(--surface-2);
+    background: linear-gradient(
+    90deg,
+    #020b2b 0%,
+    #051132 20%,
+    #06133a 50%,
+    #051132 80%,
+    #020b2b 100%
+  );
   -webkit-font-smoothing: antialiased;
 }
 
@@ -61,6 +68,13 @@
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { background: var(--surface-2); }
+body {   background: linear-gradient(
+    90deg,
+    #020b2b 0%,
+    #051132 20%,
+    #06133a 50%,
+    #051132 80%,
+    #020b2b 100%
+  ); }
 
 
